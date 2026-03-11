@@ -12,17 +12,30 @@ export default async function DashboardPage() {
     redirect("/?signin=required");
   }
 
-  const authenticatedSession = session;
-  const courses = studyRepository.getCoursesWithAssignments();
+  const dashboardData = await studyRepository.getCoursesWithAssignments(session.sessionId);
 
   return (
     <PageShell title="Dashboard" actions={<UserMenu />}>
       <p>
-        Signed in as: {authenticatedSession.user.name} ({authenticatedSession.user.email})
+        Signed in as: {session.user.name} ({session.user.email})
       </p>
-      {courses.map((course) => (
-        <CourseSection key={course.id} course={course} assignments={course.assignments} />
-      ))}
+
+      {dashboardData.message ? (
+        <section className="card">
+          <p>{dashboardData.message}</p>
+        </section>
+      ) : null}
+
+      {dashboardData.courses.length === 0 ? (
+        <section className="card">
+          <h2>No courses available</h2>
+          <p>We could not find active courses for this account yet.</p>
+        </section>
+      ) : (
+        dashboardData.courses.map((course) => (
+          <CourseSection key={course.id} course={course} assignments={course.assignments} />
+        ))
+      )}
     </PageShell>
   );
 }

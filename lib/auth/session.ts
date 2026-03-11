@@ -6,6 +6,7 @@ const SESSION_COOKIE_NAME = "ai_study_portal_session";
 const SESSION_DURATION_SECONDS = 60 * 60 * 24 * 7;
 
 type SessionPayload = {
+  sessionId: string;
   user: SignedInUser;
   expiresAt: number;
 };
@@ -39,7 +40,7 @@ function decodeSession(rawValue: string): SessionPayload | null {
   }
 
   const expectedSignature = signValue(base64Payload);
-  if (signature.length != expectedSignature.length) {
+  if (signature.length !== expectedSignature.length) {
     return null;
   }
 
@@ -51,7 +52,7 @@ function decodeSession(rawValue: string): SessionPayload | null {
     const payloadText = Buffer.from(base64Payload, "base64url").toString("utf8");
     const payload = JSON.parse(payloadText) as SessionPayload;
 
-    if (!payload.user?.id || !payload.user?.email || !payload.expiresAt) {
+    if (!payload.sessionId || !payload.user?.id || !payload.user?.email || !payload.expiresAt) {
       return null;
     }
 
@@ -80,6 +81,7 @@ export async function getSession(): Promise<AuthSession | null> {
   }
 
   return {
+    sessionId: payload.sessionId,
     user: payload.user,
     expiresAt: payload.expiresAt
   };
@@ -88,7 +90,8 @@ export async function getSession(): Promise<AuthSession | null> {
 export async function setSession(user: SignedInUser) {
   const cookieStore = cookies();
   const expiresAt = Date.now() + SESSION_DURATION_SECONDS * 1000;
-  const value = encodeSession({ user, expiresAt });
+  const sessionId = crypto.randomUUID();
+  const value = encodeSession({ sessionId, user, expiresAt });
 
   cookieStore.set(SESSION_COOKIE_NAME, value, {
     httpOnly: true,
@@ -97,6 +100,8 @@ export async function setSession(user: SignedInUser) {
     path: "/",
     maxAge: SESSION_DURATION_SECONDS
   });
+
+  return sessionId;
 }
 
 export async function clearSession() {

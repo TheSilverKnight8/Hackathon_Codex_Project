@@ -13,17 +13,21 @@ export function CourseSection({ course, assignments }: CourseSectionProps) {
       <p>
         {course.teacherName} · {course.term}
       </p>
-      <ul className="list">
-        {assignments.map((assignment) => (
-          <li key={assignment.id}>
-            <div>
-              <strong>{assignment.title}</strong>
-              <p>Due: {assignment.dueDate}</p>
-            </div>
-            <Link href={`/assignments/${assignment.id}`}>Open</Link>
-          </li>
-        ))}
-      </ul>
+      {assignments.length === 0 ? (
+        <p>No coursework found for this course yet.</p>
+      ) : (
+        <ul className="list">
+          {assignments.map((assignment) => (
+            <li key={assignment.id}>
+              <div>
+                <strong>{assignment.title}</strong>
+                <p>Due: {assignment.dueDate}</p>
+              </div>
+              <Link href={`/assignments/${assignment.id}`}>Open</Link>
+            </li>
+          ))}
+        </ul>
+      )}
     </section>
   );
 }

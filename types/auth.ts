@@ -6,6 +6,7 @@ export type SignedInUser = {
 };
 
 export type AuthSession = {
+  sessionId: string;
   user: SignedInUser;
   expiresAt: number;
 };

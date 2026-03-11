@@ -2,22 +2,24 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { MaterialPickerMock } from "@/components/MaterialPickerMock";
 import { PageShell } from "@/components/PageShell";
+import { getSession } from "@/lib/auth/session";
 import { studyRepository } from "@/lib/studyRepository";
 
 type AssignmentDetailPageProps = {
   params: { assignmentId: string };
 };
 
-export default function AssignmentDetailPage({ params }: AssignmentDetailPageProps) {
-  const assignment = studyRepository.getAssignmentById(params.assignmentId);
+export default async function AssignmentDetailPage({ params }: AssignmentDetailPageProps) {
+  const session = await getSession();
+  const assignment = studyRepository.getAssignmentById(params.assignmentId, session?.sessionId);
 
   if (!assignment) {
     notFound();
   }
 
   const selectedAssignment = assignment;
-  const course = studyRepository.getCourseById(selectedAssignment.courseId);
-  const materials = studyRepository.getMaterialsForAssignment(selectedAssignment.id);
+  const course = studyRepository.getCourseById(selectedAssignment.courseId, session?.sessionId);
+  const materials = studyRepository.getMaterialsForAssignment(selectedAssignment.id, session?.sessionId);
 
   return (
     <PageShell title="Assignment Detail">

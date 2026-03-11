@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/components/auth/AuthProvider";
+import { GOOGLE_CLASSROOM_SCOPE_STRING } from "@/lib/auth/googleScopes";
 
 declare global {
   interface Window {
@@ -17,7 +18,13 @@ declare global {
             parent: HTMLElement,
             options: { theme: "outline" | "filled_blue"; size: "large" | "medium" }
           ) => void;
-          prompt: () => void;
+        };
+        oauth2: {
+          initTokenClient: (config: {
+            client_id: string;
+            scope: string;
+            callback: (response: { access_token?: string; expires_in?: number; error?: string }) => void;
+          }) => { requestAccessToken: (options?: { prompt?: "consent" | "none" }) => void };
         };
       };
     };
@@ -44,6 +51,35 @@ export function GoogleSignInButton() {
       return;
     }
 
+    function requestClassroomAccessToken() {
+      return new Promise<{ accessToken: string; expiresIn: number } | null>((resolve) => {
+        const google = window.google;
+
+        if (!google) {
+          resolve(null);
+          return;
+        }
+
+        const tokenClient = google.accounts.oauth2.initTokenClient({
+          client_id: clientId,
+          scope: GOOGLE_CLASSROOM_SCOPE_STRING,
+          callback: (response) => {
+            if (response.error || !response.access_token || !response.expires_in) {
+              resolve(null);
+              return;
+            }
+
+            resolve({
+              accessToken: response.access_token,
+              expiresIn: response.expires_in
+            });
+          }
+        });
+
+        tokenClient.requestAccessToken({ prompt: "consent" });
+      });
+    }
+
     function renderGoogleButton() {
       const google = window.google;
       const container = buttonContainerRef.current;
@@ -61,10 +97,15 @@ export function GoogleSignInButton() {
             return;
           }
 
+          const classroomToken = await requestClassroomAccessToken();
           const response = await fetch("/api/auth/google", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ credential })
+            body: JSON.stringify({
+              credential,
+              classroomAccessToken: classroomToken?.accessToken,
+              classroomAccessTokenExpiresIn: classroomToken?.expiresIn
+            })
           });
 
           if (!response.ok) {
