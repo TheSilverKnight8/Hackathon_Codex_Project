@@ -1,0 +1,336 @@
+# AGENTS.md
+
+Project: AI Study Portal  
+Purpose: Provide instructions and constraints for AI coding agents working in this repository.
+
+This file defines how agents should behave, how the codebase is structured, and what design principles must be respected. Agents must follow these rules when generating or modifying code.
+
+---
+
+# 1. Project Overview
+
+This project builds a web application that helps students organize and study assignments by aggregating relevant materials.
+
+Core workflow:
+
+1. User signs in with Google
+2. App reads Google Classroom assignments
+3. User selects an assignment
+4. User selects relevant Google Drive files through Google Picker
+5. App extracts assignment and document content
+6. AI generates a structured study portal containing:
+   - assignment summary
+   - key concepts
+   - study checklist
+   - suggested research topics
+
+The goal is to reduce friction between scattered academic resources.
+
+The system must always prioritize privacy, minimal access, and clarity.
+
+---
+
+# 2. Architecture
+
+The system is divided into five logical layers.
+
+## Frontend
+
+Technology:
+- Next.js
+- TypeScript
+- React
+
+Responsibilities:
+- authentication UI
+- assignment dashboard
+- assignment detail page
+- generated study portal
+
+Rules:
+- keep components small
+- avoid large monolithic pages
+- avoid business logic in components
+
+---
+
+## API / Server Layer
+
+Responsibilities:
+- authentication token handling
+- Google API calls
+- file retrieval
+- AI request orchestration
+
+Rules:
+- all external API calls must happen server side
+- frontend must not expose secret keys
+- maintain clean service abstractions
+
+---
+
+## Service Layer
+
+Located in `/lib` or `/services`.
+
+Responsibilities:
+- Google Classroom client
+- Google Drive file retrieval
+- document text extraction
+- portal generation logic
+
+Rules:
+- services must be independent modules
+- do not mix API logic with UI logic
+
+---
+
+## Data Layer
+
+Possible storage options:
+- Supabase
+- Firebase
+- lightweight JSON storage during development
+
+Data stored:
+- user session metadata
+- assignment references
+- selected file metadata
+- generated portal cache
+
+Rules:
+- never store raw Google tokens in plaintext
+- avoid unnecessary persistent storage
+
+---
+
+## AI Layer
+
+Responsibilities:
+- convert assignment + notes into structured output
+
+Input:
+- assignment metadata
+- assignment instructions
+- extracted file content
+
+Output structure:
+{
+summary: string,
+keyConcepts: string[],
+actionPlan: string[],
+studyChecklist: string[],
+researchTopics: string[]
+}
+
+
+Rules:
+- AI output must always be structured
+- avoid returning raw paragraphs only
+
+---
+
+# 3. Repository Structure
+
+Expected repository layout:
+/app
+/pages
+/components
+/lib
+/services
+/types
+/styles
+/docs
+/server
+
+.env.example
+README.md
+AGENTS.md
+
+
+Guidelines:
+
+components contain UI elements  
+services contain external integrations  
+lib contains utilities  
+types contains shared TypeScript types
+
+---
+
+# 4. Google Integration Rules
+
+This project must use **minimum permission scopes**.
+
+Allowed scopes:
+
+Google Sign In  
+Google Classroom read access  
+Drive access for user selected files only
+
+The system must **not**:
+
+scan the user's entire Drive  
+request Gmail access  
+modify Drive files  
+modify Classroom assignments
+
+File selection must be done through Google Picker.
+
+The user must explicitly choose files.
+
+---
+
+# 5. Security Requirements
+
+Never expose secrets in frontend code.
+
+Secrets must only exist in environment variables.
+
+Required environment variables:
+GOOGLE_CLIENT_ID
+GOOGLE_CLIENT_SECRET
+OPENAI_API_KEY
+
+
+Optional variables:
+SUPABASE_URL
+SUPABASE_ANON_KEY
+
+
+Rules:
+
+never commit `.env` files  
+never log access tokens  
+never embed secrets in client code
+
+---
+
+# 6. Coding Standards
+
+Agents must follow these rules.
+
+Use TypeScript everywhere.
+
+Prefer explicit types over `any`.
+
+Avoid deeply nested logic.
+
+Prefer pure functions when possible.
+
+Avoid large files.
+
+Maximum recommended file sizes:
+
+components: 200 lines  
+services: 300 lines
+
+---
+
+# 7. Agent Behavior Rules
+
+Agents must operate conservatively.
+
+When making changes:
+
+- modify only files relevant to the task
+- avoid refactoring unrelated code
+- avoid renaming files without reason
+- do not change architecture unless asked
+
+Before major changes:
+
+- explain the change
+- list affected files
+
+After implementing features:
+
+- include clear comments
+- update README if setup changes
+
+---
+
+# 8. Development Phases
+
+Agents should prioritize work in the following order.
+
+Phase 1  
+Frontend scaffold with mock data
+
+Phase 2  
+Google authentication
+
+Phase 3  
+Google Classroom assignment retrieval
+
+Phase 4  
+Assignment detail page
+
+Phase 5  
+Google Picker integration
+
+Phase 6  
+Drive file extraction
+
+Phase 7  
+AI portal generation
+
+Phase 8  
+Persistence and caching
+
+Agents should not skip phases unless instructed.
+
+---
+
+# 9. Non Goals
+
+Agents must not attempt to build:
+
+a full LMS  
+automatic scanning of all Drive documents  
+complex recommendation engines  
+background crawling of user data
+
+Focus only on the core assignment-to-portal workflow.
+
+---
+
+# 10. Documentation Requirements
+
+README must always include:
+
+project description  
+setup instructions  
+environment variables  
+API configuration steps  
+development commands
+
+Agents must update documentation when setup changes.
+
+---
+
+# 11. Testing Guidelines
+
+When possible:
+
+add small functional tests  
+test API routes independently  
+verify API error handling
+
+Agents must avoid introducing breaking changes.
+
+---
+
+# 12. Design Principles
+
+The application should follow these principles:
+
+Clarity over complexity  
+Minimal access to user data  
+Small composable modules  
+Predictable structured AI outputs
+
+The final system should feel like a focused academic tool rather than a generic productivity app.
+
+---
+
+End of AGENTS.md
