@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { MaterialPickerMock } from "@/components/MaterialPickerMock";
+import { DriveFilePickerPanel } from "@/components/drive/DriveFilePickerPanel";
 import { PageShell } from "@/components/PageShell";
 import { getSession } from "@/lib/auth/session";
 import { studyRepository } from "@/lib/studyRepository";
@@ -17,21 +18,24 @@ export default async function AssignmentDetailPage({ params }: AssignmentDetailP
     notFound();
   }
 
-  const selectedAssignment = assignment;
-  const course = studyRepository.getCourseById(selectedAssignment.courseId, session?.sessionId);
-  const materials = studyRepository.getMaterialsForAssignment(selectedAssignment.id, session?.sessionId);
+  const course = studyRepository.getCourseById(assignment.courseId, session?.sessionId);
+  const selectedFiles = studyRepository.getSelectedFilesForAssignment(assignment.id, session?.sessionId);
+  const fallbackMaterials = selectedFiles.length === 0 ? studyRepository.getMaterialsForAssignment(assignment.id, session?.sessionId) : [];
 
   return (
     <PageShell title="Assignment Detail">
       <section className="card">
-        <h2>{selectedAssignment.title}</h2>
+        <h2>{assignment.title}</h2>
         <p>
-          Course: {course?.title} · Due: {selectedAssignment.dueDate} · Est. {selectedAssignment.estimatedMinutes} minutes
+          Course: {course?.title} · Due: {assignment.dueDate} · Est. {assignment.estimatedMinutes} minutes
         </p>
-        <p>{selectedAssignment.instructions}</p>
+        <p>{assignment.instructions}</p>
       </section>
-      <MaterialPickerMock materials={materials} />
-      <Link className="button" href={`/portal/${selectedAssignment.id}`}>
+
+      <DriveFilePickerPanel assignmentId={assignment.id} initialSelectedFiles={selectedFiles} />
+      {fallbackMaterials.length > 0 ? <MaterialPickerMock materials={fallbackMaterials} /> : null}
+
+      <Link className="button" href={`/portal/${assignment.id}`}>
         Generate Study Portal (Mock)
       </Link>
     </PageShell>

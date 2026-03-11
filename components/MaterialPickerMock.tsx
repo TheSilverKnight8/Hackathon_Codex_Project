@@ -7,14 +7,12 @@ type MaterialPickerMockProps = {
 export function MaterialPickerMock({ materials }: MaterialPickerMockProps) {
   return (
     <section className="card">
-      <h3>Google Picker (Mock)</h3>
-      <p>Select study files to include in your portal.</p>
+      <h3>Fallback Materials</h3>
+      <p>These mock/generated materials are shown when no Google Drive files are selected yet.</p>
       <ul className="checklist">
         {materials.map((material) => (
           <li key={material.id}>
-            <label>
-              <input type="checkbox" defaultChecked={material.selectedByUser} /> {material.name} ({material.kind})
-            </label>
+            {material.name} ({material.kind ?? material.mimeType ?? "file"})
           </li>
         ))}
       </ul>

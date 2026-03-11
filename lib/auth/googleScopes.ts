@@ -3,4 +3,6 @@ export const GOOGLE_CLASSROOM_SCOPES = [
   "https://www.googleapis.com/auth/classroom.coursework.me.readonly"
 ] as const;
 
+export const GOOGLE_DRIVE_PICKER_SCOPE = "https://www.googleapis.com/auth/drive.file";
+
 export const GOOGLE_CLASSROOM_SCOPE_STRING = GOOGLE_CLASSROOM_SCOPES.join(" ");

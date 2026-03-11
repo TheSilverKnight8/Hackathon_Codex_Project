@@ -21,9 +21,13 @@ export type StudyMaterial = {
   id: string;
   assignmentId: string;
   name: string;
-  kind: "doc" | "slides" | "pdf" | "sheet";
-  source: "google_drive";
-  selectedByUser: boolean;
+  sourceType: "google_drive_picker" | "google_drive_mock";
+  dateSelected: string;
+  mimeType?: string;
+  webViewLink?: string;
+  iconLink?: string;
+  thumbnailLink?: string;
+  kind?: "doc" | "slides" | "pdf" | "sheet";
 };
 
 export type StudyPortal = {

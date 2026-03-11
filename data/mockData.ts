@@ -34,40 +34,40 @@ export const studyMaterials: StudyMaterial[] = [
     assignmentId: "a1",
     name: "Lab Notes - Yeast Respiration",
     kind: "doc",
-    source: "google_drive",
-    selectedByUser: false
+    sourceType: "google_drive_mock",
+    dateSelected: "2026-03-10T10:00:00.000Z"
   },
   {
     id: "m2",
     assignmentId: "a1",
     name: "Chapter 7 Metabolism Slides",
     kind: "slides",
-    source: "google_drive",
-    selectedByUser: false
+    sourceType: "google_drive_mock",
+    dateSelected: "2026-03-10T10:00:00.000Z"
   },
   {
     id: "m3",
     assignmentId: "a1",
     name: "Cell Energy Review Sheet",
     kind: "sheet",
-    source: "google_drive",
-    selectedByUser: false
+    sourceType: "google_drive_mock",
+    dateSelected: "2026-03-10T10:00:00.000Z"
   },
   {
     id: "m4",
     assignmentId: "a2",
     name: "Muckraker Articles Packet",
     kind: "pdf",
-    source: "google_drive",
-    selectedByUser: false
+    sourceType: "google_drive_mock",
+    dateSelected: "2026-03-10T10:00:00.000Z"
   },
   {
     id: "m5",
     assignmentId: "a2",
     name: "Lecture Notes - Urban Reform",
     kind: "doc",
-    source: "google_drive",
-    selectedByUser: false
+    sourceType: "google_drive_mock",
+    dateSelected: "2026-03-10T10:00:00.000Z"
   }
 ];
 

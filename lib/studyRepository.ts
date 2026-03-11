@@ -1,6 +1,12 @@
 import { assignments, courses, studyMaterials, studyPortals } from "@/data/mockData";
 import { getClassroomAccessToken } from "@/lib/auth/tokenStore";
 import { getSessionClassroomData, saveSessionClassroomData } from "@/lib/services/classroomCache";
+import {
+  clearSessionSelectedFiles,
+  getSelectedFiles,
+  removeSelectedFile,
+  saveSelectedFiles
+} from "@/lib/services/selectedFilesStore";
 import { fetchClassroomCourses, fetchCourseAssignments } from "@/lib/services/googleClassroomService";
 import { Assignment, Course, StudyMaterial, StudyPortal } from "@/types/study";
 
@@ -26,16 +32,16 @@ function createGeneratedMaterials(assignment: Assignment): StudyMaterial[] {
       assignmentId: assignment.id,
       name: `${assignment.title} - Class Notes`,
       kind: "doc",
-      source: "google_drive",
-      selectedByUser: false
+      sourceType: "google_drive_mock",
+      dateSelected: new Date().toISOString()
     },
     {
       id: `gm_${assignment.id}_2`,
       assignmentId: assignment.id,
       name: `${assignment.title} - Reference Slides`,
       kind: "slides",
-      source: "google_drive",
-      selectedByUser: false
+      sourceType: "google_drive_mock",
+      dateSelected: new Date().toISOString()
     }
   ];
 }
@@ -155,7 +161,43 @@ export const studyRepository = {
     return classroomData?.courses.find((course) => course.id === courseId) ?? null;
   },
 
+  getSelectedFilesForAssignment(assignmentId: string, sessionId?: string) {
+    if (!sessionId) {
+      return [];
+    }
+
+    return getSelectedFiles(sessionId, assignmentId);
+  },
+
+  saveSelectedFilesForAssignment(assignmentId: string, files: StudyMaterial[], sessionId?: string) {
+    if (!sessionId) {
+      return [];
+    }
+
+    saveSelectedFiles(sessionId, assignmentId, files);
+    return getSelectedFiles(sessionId, assignmentId);
+  },
+
+  removeSelectedFileForAssignment(assignmentId: string, fileId: string, sessionId?: string) {
+    if (!sessionId) {
+      return [];
+    }
+
+    removeSelectedFile(sessionId, assignmentId, fileId);
+    return getSelectedFiles(sessionId, assignmentId);
+  },
+
+  clearSessionSelectedFiles(sessionId: string) {
+    clearSessionSelectedFiles(sessionId);
+  },
+
   getMaterialsForAssignment(assignmentId: string, sessionId?: string) {
+    const selectedFiles = this.getSelectedFilesForAssignment(assignmentId, sessionId);
+
+    if (selectedFiles.length > 0) {
+      return selectedFiles;
+    }
+
     const mockMaterials = studyMaterials.filter((material) => material.assignmentId === assignmentId);
 
     if (mockMaterials.length > 0) {
