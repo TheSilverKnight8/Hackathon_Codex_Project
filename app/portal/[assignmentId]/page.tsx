@@ -15,13 +15,16 @@ export default function StudyPortalPage({ params }: StudyPortalPageProps) {
     notFound();
   }
 
+  const selectedAssignment = assignment;
+  const selectedPortal = portal;
+
   return (
     <PageShell title="Study Portal">
       <section className="card">
-        <h2>{assignment.title}</h2>
+        <h2>{selectedAssignment.title}</h2>
         <p>Generated from your selected assignment files (mock).</p>
       </section>
-      <PortalPreview portal={portal} />
+      <PortalPreview portal={selectedPortal} />
     </PageShell>
   );
 }

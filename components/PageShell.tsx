@@ -4,9 +4,10 @@ import { ReactNode } from "react";
 type PageShellProps = {
   title: string;
   children: ReactNode;
+  actions?: ReactNode;
 };
 
-export function PageShell({ title, children }: PageShellProps) {
+export function PageShell({ title, children, actions }: PageShellProps) {
   return (
     <main className="container">
       <header className="header">
@@ -15,6 +16,7 @@ export function PageShell({ title, children }: PageShellProps) {
           <Link href="/">Landing</Link>
           <Link href="/dashboard">Dashboard</Link>
         </nav>
+        {actions}
       </header>
       {children}
     </main>

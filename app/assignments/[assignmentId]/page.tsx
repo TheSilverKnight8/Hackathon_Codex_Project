@@ -15,20 +15,21 @@ export default function AssignmentDetailPage({ params }: AssignmentDetailPagePro
     notFound();
   }
 
-  const course = studyRepository.getCourseById(assignment.courseId);
-  const materials = studyRepository.getMaterialsForAssignment(assignment.id);
+  const selectedAssignment = assignment;
+  const course = studyRepository.getCourseById(selectedAssignment.courseId);
+  const materials = studyRepository.getMaterialsForAssignment(selectedAssignment.id);
 
   return (
     <PageShell title="Assignment Detail">
       <section className="card">
-        <h2>{assignment.title}</h2>
+        <h2>{selectedAssignment.title}</h2>
         <p>
-          Course: {course?.title} · Due: {assignment.dueDate} · Est. {assignment.estimatedMinutes} minutes
+          Course: {course?.title} · Due: {selectedAssignment.dueDate} · Est. {selectedAssignment.estimatedMinutes} minutes
         </p>
-        <p>{assignment.instructions}</p>
+        <p>{selectedAssignment.instructions}</p>
       </section>
       <MaterialPickerMock materials={materials} />
-      <Link className="button" href={`/portal/${assignment.id}`}>
+      <Link className="button" href={`/portal/${selectedAssignment.id}`}>
         Generate Study Portal (Mock)
       </Link>
     </PageShell>

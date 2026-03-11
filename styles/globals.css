@@ -72,3 +72,37 @@ body {
   grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
   gap: 12px;
 }
+
+
+.notice {
+  background: #fef3c7;
+  color: #92400e;
+  padding: 10px;
+  border-radius: 6px;
+}
+
+.user-menu {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-left: auto;
+}
+
+.user-menu p {
+  margin: 0;
+  font-size: 0.85rem;
+}
+
+.user-menu button {
+  border: 1px solid #d1d5db;
+  background: white;
+  border-radius: 6px;
+  padding: 6px 10px;
+  cursor: pointer;
+}
+
+.avatar {
+  width: 32px;
+  height: 32px;
+  border-radius: 999px;
+}
