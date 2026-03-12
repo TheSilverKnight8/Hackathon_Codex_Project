@@ -1,4 +1,5 @@
 import { Assignment, Course, ExtractedFileContent, PortalSourceUsed, StudyPortal } from "@/types/study";
+import { generatePortalWithOpenAi } from "@/lib/services/openAiPortalProvider";
 
 type NormalizedSource = {
   fileId: string;
@@ -26,7 +27,7 @@ export function normalizeExtractionInputs(extractions: ExtractedFileContent[]) {
     .filter((item) => item.text.length > 0);
 }
 
-function buildKeyConcepts(assignment: Assignment, normalizedSources: NormalizedSource[]) {
+function buildFallbackKeyConcepts(assignment: Assignment, normalizedSources: NormalizedSource[]) {
   const seedTerms = [assignment.title, ...normalizedSources.map((source) => source.fileName)];
   return seedTerms
     .flatMap((term) => term.split(/[^A-Za-z0-9]+/))
@@ -43,30 +44,21 @@ function buildSourcesUsed(normalizedSources: NormalizedSource[]): PortalSourceUs
   }));
 }
 
-export function generateStudyPortal(params: {
+function buildDeterministicFallbackPortal(params: {
   assignment: Assignment;
   course: Course | null;
-  extractions: ExtractedFileContent[];
-}): { portal: StudyPortal | null; usedFallback: boolean; message?: string } {
-  const normalizedSources = normalizeExtractionInputs(params.extractions);
-
-  if (normalizedSources.length === 0) {
-    return {
-      portal: null,
-      usedFallback: true,
-      message: "No extracted text is available yet. Generate extraction first."
-    };
-  }
-
-  const combinedExcerpt = normalizedSources.map((source) => source.text).join(" ").slice(0, 1200);
-  const keyConcepts = buildKeyConcepts(params.assignment, normalizedSources);
+  normalizedSources: NormalizedSource[];
+  sourcesUsed: PortalSourceUsed[];
+}) {
+  const combinedExcerpt = params.normalizedSources.map((source) => source.text).join(" ").slice(0, 1200);
+  const keyConcepts = buildFallbackKeyConcepts(params.assignment, params.normalizedSources);
   const dueDateText = params.assignment.dueDate || "No due date set";
 
-  const portal: StudyPortal = {
+  return {
     id: `generated_${params.assignment.id}`,
     assignmentId: params.assignment.id,
     summary:
-      `This portal was generated from extracted assignment files for ${params.assignment.title}. ` +
+      `This fallback portal was generated from extracted assignment files for ${params.assignment.title}. ` +
       `Course: ${params.course?.title ?? "Unknown course"}. Due: ${dueDateText}. ` +
       combinedExcerpt.slice(0, 320),
     keyConcepts: keyConcepts.length > 0 ? keyConcepts : ["Main objective", "Supporting evidence", "Final deliverable"],
@@ -84,13 +76,63 @@ export function generateStudyPortal(params: {
       `${params.assignment.title} background context`,
       `${params.course?.title ?? "Course topic"} example analyses`
     ],
-    sourcesUsed: buildSourcesUsed(normalizedSources),
+    sourcesUsed: params.sourcesUsed,
     generatedAt: new Date().toISOString(),
-    usedFallback: false
-  };
+    usedFallback: true
+  } satisfies StudyPortal;
+}
 
-  return {
-    portal,
-    usedFallback: false
-  };
+export async function generateStudyPortal(params: {
+  assignment: Assignment;
+  course: Course | null;
+  extractions: ExtractedFileContent[];
+}): Promise<{ portal: StudyPortal | null; usedFallback: boolean; message?: string }> {
+  const normalizedSources = normalizeExtractionInputs(params.extractions);
+
+  if (normalizedSources.length === 0) {
+    return {
+      portal: null,
+      usedFallback: true,
+      message: "No extracted text is available yet. Generate extraction first."
+    };
+  }
+
+  const sourcesUsed = buildSourcesUsed(normalizedSources);
+
+  try {
+    const aiDraft = await generatePortalWithOpenAi({
+      assignment: params.assignment,
+      courseName: params.course?.title,
+      dueDate: params.assignment.dueDate,
+      normalizedSources,
+      sourcesUsed
+    });
+
+    return {
+      portal: {
+        id: `generated_${params.assignment.id}`,
+        assignmentId: params.assignment.id,
+        summary: aiDraft.summary,
+        keyConcepts: aiDraft.keyConcepts,
+        actionPlan: aiDraft.actionPlan,
+        studyChecklist: aiDraft.studyChecklist,
+        researchTopics: aiDraft.researchTopics,
+        sourcesUsed,
+        generatedAt: new Date().toISOString(),
+        usedFallback: false
+      },
+      usedFallback: false
+    };
+  } catch (error) {
+    return {
+      portal: buildDeterministicFallbackPortal({
+        assignment: params.assignment,
+        course: params.course,
+        normalizedSources,
+        sourcesUsed
+      }),
+      usedFallback: true,
+      message: error instanceof Error ? error.message : "AI generation failed; fallback portal used."
+    };
+  }
 }

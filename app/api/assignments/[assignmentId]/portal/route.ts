@@ -49,7 +49,7 @@ export async function POST(_request: NextRequest, { params }: RouteProps) {
 
   studyRepository.setPortalGenerationRecordForAssignment(params.assignmentId, generatingRecord, session.sessionId);
 
-  const generated = generateStudyPortal({
+  const generated = await generateStudyPortal({
     assignment,
     course,
     extractions
@@ -73,9 +73,10 @@ export async function POST(_request: NextRequest, { params }: RouteProps) {
 
   const successRecord: PortalGenerationRecord = {
     assignmentId: params.assignmentId,
-    status: "generated",
+    status: generated.usedFallback ? "fallback" : "generated",
     portal: generated.portal,
-    updatedAt: new Date().toISOString()
+    updatedAt: new Date().toISOString(),
+    errorMessage: generated.message
   };
 
   studyRepository.setPortalGenerationRecordForAssignment(params.assignmentId, successRecord, session.sessionId);

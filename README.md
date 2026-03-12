@@ -2,7 +2,7 @@
 
 AI Study Portal is a Next.js + TypeScript web app that helps students move from one assignment to a focused study workspace.
 
-Current milestone: **Phase 6 complete — Google sign-in + Classroom read + Drive Picker + extraction + server-side structured portal generation**.
+Current milestone: **Phase 7 complete — AI-backed server-side portal generation with fallback behavior**.
 
 ## What is included
 
@@ -11,7 +11,7 @@ Current milestone: **Phase 6 complete — Google sign-in + Classroom read + Driv
 - Assignment detail page with Google Picker integration and extraction preview
 - Selected Drive file metadata persisted per session and assignment
 - Server-side text extraction with per-file status
-- Server-side structured portal generation from assignment metadata + extracted text
+- AI-backed structured portal generation from assignment metadata + extracted text
 - Portal page with generation trigger, status, source labeling, and sources used
 
 ## Tech stack
@@ -41,12 +41,12 @@ cp .env.example .env.local
 - `NEXT_PUBLIC_GOOGLE_API_KEY`
 - `NEXT_PUBLIC_GOOGLE_APP_ID`
 - `AUTH_SESSION_SECRET`
+- `OPENAI_API_KEY`
 
-4. Optional data source switch:
+4. Optional values:
 
-- `STUDY_DATA_SOURCE=auto` (default)
-- `STUDY_DATA_SOURCE=classroom`
-- `STUDY_DATA_SOURCE=mock`
+- `OPENAI_PORTAL_MODEL` (default: `gpt-4o-mini`)
+- `STUDY_DATA_SOURCE=auto|classroom|mock`
 
 5. Run the development server:
 
@@ -65,15 +65,16 @@ npm run dev
 - `NEXT_PUBLIC_GOOGLE_API_KEY` - required by Google Picker builder
 - `NEXT_PUBLIC_GOOGLE_APP_ID` - Google Cloud project number used by Picker
 - `AUTH_SESSION_SECRET` - signs HTTP-only session cookie
+- `OPENAI_API_KEY` - used server-side for AI portal generation
 
 ### Optional now
 
+- `OPENAI_PORTAL_MODEL` - OpenAI model for portal generation (`gpt-4o-mini` by default)
 - `STUDY_DATA_SOURCE` - mock vs Classroom selection (`auto`, `classroom`, `mock`)
 
 ### Planned for later phases
 
 - `GOOGLE_CLIENT_SECRET`
-- `OPENAI_API_KEY`
 - `SUPABASE_URL`
 - `SUPABASE_ANON_KEY`
 
@@ -89,7 +90,7 @@ Why `drive.file`:
 - It is the narrowest practical Drive scope for user-selected files.
 - It avoids broad full-drive access.
 
-## Google Cloud Console setup (Phase 6)
+## Google Cloud Console setup
 
 1. Create or select a Google Cloud project.
 2. Configure OAuth consent screen.
@@ -106,6 +107,13 @@ Why `drive.file`:
 7. Create API key for Picker and set `NEXT_PUBLIC_GOOGLE_API_KEY`.
 8. Use your Google Cloud project number as `NEXT_PUBLIC_GOOGLE_APP_ID`.
 9. If app is in testing mode, add test users.
+
+## OpenAI setup for this phase
+
+1. Create an OpenAI API key.
+2. Set `OPENAI_API_KEY` in `.env.local`.
+3. Optionally set `OPENAI_PORTAL_MODEL`.
+4. Portal generation is fully server-side; no OpenAI key is exposed to client code.
 
 ## File extraction support and limitations
 
@@ -126,20 +134,24 @@ Generation input:
 - assignment instructions
 - course name (if available)
 - due date (if available)
-- successfully extracted file text only
+- normalized text from successfully extracted files only
+- per-file source provenance
 
 Generation pipeline:
 - normalization trims text, removes excessive whitespace, and applies a conservative per-file length cap
 - failed/unsupported extractions are ignored
-- generated portal includes structured sections and file-level provenance in `sourcesUsed`
+- AI provider returns strict-schema structured output
+- provider output is validated before saving
+- `sourcesUsed` provenance is preserved in the final portal object
 
 Fallback behavior:
-- if no usable extracted text exists, portal generation returns fallback content and a clear status/message
+- if no usable extracted text exists, portal generation returns fallback content and clear status/message
+- if OpenAI is unavailable or output validation fails, deterministic fallback portal content is used
 - portal page always remains usable with fallback content
 
 Current limitation:
-- generated portal is heuristic and deterministic (no AI model call yet)
-- extracted text is not chunked/retrieved semantically yet
+- no chunk retrieval/reranking pipeline yet
+- no citation spans in generated sections yet
 
 ## Development commands
 
