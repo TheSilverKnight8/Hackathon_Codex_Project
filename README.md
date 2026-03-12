@@ -2,16 +2,17 @@
 
 AI Study Portal is a Next.js + TypeScript web app that helps students move from one assignment to a focused study workspace.
 
-Current milestone: **Phase 5 complete — Google sign-in + Classroom read + Drive Picker selection + server-side raw text extraction preview**.
+Current milestone: **Phase 6 complete — Google sign-in + Classroom read + Drive Picker + extraction + server-side structured portal generation**.
 
 ## What is included
 
 - Landing page with Google sign-in
 - Auth-guarded dashboard with Classroom/mock course data
-- Assignment detail page with Google Picker integration
+- Assignment detail page with Google Picker integration and extraction preview
 - Selected Drive file metadata persisted per session and assignment
-- Server-side text extraction and raw preview for selected files
-- Study portal page (still mock/generated content)
+- Server-side text extraction with per-file status
+- Server-side structured portal generation from assignment metadata + extracted text
+- Portal page with generation trigger, status, source labeling, and sources used
 
 ## Tech stack
 
@@ -88,7 +89,7 @@ Why `drive.file`:
 - It is the narrowest practical Drive scope for user-selected files.
 - It avoids broad full-drive access.
 
-## Google Cloud Console setup (Phase 5)
+## Google Cloud Console setup (Phase 6)
 
 1. Create or select a Google Cloud project.
 2. Configure OAuth consent screen.
@@ -117,7 +118,28 @@ Current behavior:
 - Each selected file has extraction status: `not_extracted`, `extracting`, `extracted`, or `failed`.
 - Unsupported file types are marked `failed` with a clear error message.
 - Raw extracted text is previewed on the assignment detail page.
-- Extracted text is **not yet** used to generate the final study portal.
+
+## Portal generation behavior (this phase)
+
+Generation input:
+- assignment title
+- assignment instructions
+- course name (if available)
+- due date (if available)
+- successfully extracted file text only
+
+Generation pipeline:
+- normalization trims text, removes excessive whitespace, and applies a conservative per-file length cap
+- failed/unsupported extractions are ignored
+- generated portal includes structured sections and file-level provenance in `sourcesUsed`
+
+Fallback behavior:
+- if no usable extracted text exists, portal generation returns fallback content and a clear status/message
+- portal page always remains usable with fallback content
+
+Current limitation:
+- generated portal is heuristic and deterministic (no AI model call yet)
+- extracted text is not chunked/retrieved semantically yet
 
 ## Development commands
 

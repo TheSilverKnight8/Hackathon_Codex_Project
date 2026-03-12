@@ -1,6 +1,6 @@
 import { notFound } from "next/navigation";
 import { PageShell } from "@/components/PageShell";
-import { PortalPreview } from "@/components/PortalPreview";
+import { PortalGenerationPanel } from "@/components/portal/PortalGenerationPanel";
 import { getSession } from "@/lib/auth/session";
 import { studyRepository } from "@/lib/studyRepository";
 
@@ -11,19 +11,33 @@ type StudyPortalPageProps = {
 export default async function StudyPortalPage({ params }: StudyPortalPageProps) {
   const session = await getSession();
   const assignment = studyRepository.getAssignmentById(params.assignmentId, session?.sessionId);
-  const portal = studyRepository.getStudyPortalForAssignment(params.assignmentId, session?.sessionId);
 
-  if (!assignment || !portal) {
+  if (!assignment) {
     notFound();
   }
+
+  const selectedAssignment = assignment;
+  const portalView = studyRepository.getPortalViewForAssignment(params.assignmentId, session?.sessionId);
+
+  if (!portalView) {
+    notFound();
+  }
+
+  const selectedPortalView = portalView;
 
   return (
     <PageShell title="Study Portal">
       <section className="card">
-        <h2>{assignment.title}</h2>
-        <p>Generated from your selected assignment files (mock).</p>
+        <h2>{selectedAssignment.title}</h2>
+        <p>Generate a structured portal from assignment metadata and extracted file text.</p>
       </section>
-      <PortalPreview portal={portal} />
+      <PortalGenerationPanel
+        assignmentId={selectedAssignment.id}
+        initialPortal={selectedPortalView.portal}
+        initialSource={selectedPortalView.source}
+        initialStatus={selectedPortalView.generationStatus}
+        initialMessage={selectedPortalView.message}
+      />
     </PageShell>
   );
 }

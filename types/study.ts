@@ -42,6 +42,12 @@ export type ExtractedFileContent = {
   errorMessage?: string;
 };
 
+export type PortalSourceUsed = {
+  fileId: string;
+  fileName: string;
+  charsUsed: number;
+};
+
 export type StudyPortal = {
   id: string;
   assignmentId: string;
@@ -50,4 +56,17 @@ export type StudyPortal = {
   actionPlan: string[];
   studyChecklist: string[];
   researchTopics: string[];
+  sourcesUsed: PortalSourceUsed[];
+  generatedAt: string;
+  usedFallback: boolean;
+};
+
+export type PortalGenerationStatus = "not_generated" | "generating" | "generated" | "fallback" | "failed";
+
+export type PortalGenerationRecord = {
+  assignmentId: string;
+  status: PortalGenerationStatus;
+  portal: StudyPortal | null;
+  updatedAt: string;
+  errorMessage?: string;
 };

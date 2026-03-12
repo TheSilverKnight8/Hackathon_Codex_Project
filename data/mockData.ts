@@ -91,7 +91,10 @@ export const studyPortals: StudyPortal[] = [
     researchTopics: [
       "How athletes train around lactic acid buildup",
       "Industrial uses of yeast fermentation"
-    ]
+    ],
+    sourcesUsed: [],
+    generatedAt: "2026-03-10T10:00:00.000Z",
+    usedFallback: true
   },
   {
     id: "p2",
@@ -109,6 +112,9 @@ export const studyPortals: StudyPortal[] = [
       "Explain at least one historical context detail.",
       "Conclude with a claim about reform impact."
     ],
-    researchTopics: ["Ida Tarbell and corporate accountability", "How city sanitation laws evolved"]
+    researchTopics: ["Ida Tarbell and corporate accountability", "How city sanitation laws evolved"],
+    sourcesUsed: [],
+    generatedAt: "2026-03-10T10:00:00.000Z",
+    usedFallback: true
   }
 ];

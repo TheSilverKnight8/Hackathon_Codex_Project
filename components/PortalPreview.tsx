@@ -27,6 +27,20 @@ export function PortalPreview({ portal }: PortalPreviewProps) {
         <h3>Research Topics</h3>
         <ul>{portal.researchTopics.map((item) => <li key={item}>{item}</li>)}</ul>
       </section>
+      <section className="card">
+        <h3>Sources Used</h3>
+        {portal.sourcesUsed.length === 0 ? (
+          <p>No extracted file sources were used. Fallback content is shown.</p>
+        ) : (
+          <ul>
+            {portal.sourcesUsed.map((source) => (
+              <li key={source.fileId}>
+                {source.fileName} ({source.charsUsed} chars)
+              </li>
+            ))}
+          </ul>
+        )}
+      </section>
     </div>
   );
 }

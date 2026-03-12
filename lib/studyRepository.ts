@@ -14,13 +14,32 @@ import {
   removeExtraction,
   upsertExtraction
 } from "@/lib/services/fileExtractionStore";
-import { Assignment, Course, ExtractedFileContent, StudyMaterial, StudyPortal } from "@/types/study";
+import {
+  clearSessionPortalGeneration,
+  getPortalGenerationRecord,
+  setPortalGenerationRecord
+} from "@/lib/services/portalGenerationStore";
+import {
+  Assignment,
+  Course,
+  ExtractedFileContent,
+  PortalGenerationRecord,
+  StudyMaterial,
+  StudyPortal
+} from "@/types/study";
 
 type CoursesWithAssignments = Course & { assignments: Assignment[] };
 
 type CourseLoadResult = {
   source: "mock" | "classroom";
   courses: CoursesWithAssignments[];
+  message?: string;
+};
+
+type PortalViewResult = {
+  portal: StudyPortal;
+  source: "generated" | "fallback";
+  generationStatus: PortalGenerationRecord["status"];
   message?: string;
 };
 
@@ -56,7 +75,7 @@ function createGeneratedPortal(assignment: Assignment): StudyPortal {
   return {
     id: `gp_${assignment.id}`,
     assignmentId: assignment.id,
-    summary: `This study portal was generated from Google Classroom assignment data for ${assignment.title}.`,
+    summary: `This study portal was generated from assignment metadata for ${assignment.title}.`,
     keyConcepts: ["Assignment requirements", "Due date planning", "Evidence collection"],
     actionPlan: [
       "Review assignment instructions and rubric details.",
@@ -68,7 +87,10 @@ function createGeneratedPortal(assignment: Assignment): StudyPortal {
       "Prepare source material and notes.",
       "Draft and revise before submission."
     ],
-    researchTopics: ["Context behind this course topic", "Examples of high-quality submissions"]
+    researchTopics: ["Context behind this course topic", "Examples of high-quality submissions"],
+    sourcesUsed: [],
+    generatedAt: new Date().toISOString(),
+    usedFallback: true
   };
 }
 
@@ -108,7 +130,6 @@ export const studyRepository = {
 
       const assignmentGroups = await Promise.all(
         classroomCourses.map(async (course) => ({
-          courseId: course.id,
           assignments: await fetchCourseAssignments(classroomToken, course.id)
         }))
       );
@@ -194,8 +215,6 @@ export const studyRepository = {
     return getSelectedFiles(sessionId, assignmentId);
   },
 
-
-
   getExtractionsForAssignment(assignmentId: string, sessionId?: string) {
     if (!sessionId) {
       return [];
@@ -215,9 +234,56 @@ export const studyRepository = {
 
     return listExtractions(sessionId, assignmentId);
   },
+
+  getPortalGenerationRecordForAssignment(assignmentId: string, sessionId?: string) {
+    if (!sessionId) {
+      return null;
+    }
+
+    return getPortalGenerationRecord(sessionId, assignmentId);
+  },
+
+  setPortalGenerationRecordForAssignment(assignmentId: string, record: PortalGenerationRecord, sessionId?: string) {
+    if (!sessionId) {
+      return null;
+    }
+
+    setPortalGenerationRecord(sessionId, assignmentId, record);
+    return getPortalGenerationRecord(sessionId, assignmentId);
+  },
+
+  getPortalViewForAssignment(assignmentId: string, sessionId?: string): PortalViewResult | null {
+    const assignment = this.getAssignmentById(assignmentId, sessionId);
+
+    if (!assignment) {
+      return null;
+    }
+
+    const generatedRecord = this.getPortalGenerationRecordForAssignment(assignmentId, sessionId);
+
+    if (generatedRecord?.portal && (generatedRecord.status === "generated" || generatedRecord.status === "fallback")) {
+      return {
+        portal: generatedRecord.portal,
+        source: generatedRecord.status === "generated" ? "generated" : "fallback",
+        generationStatus: generatedRecord.status,
+        message: generatedRecord.errorMessage
+      };
+    }
+
+    const mockPortal = studyPortals.find((portal) => portal.assignmentId === assignmentId) ?? createGeneratedPortal(assignment);
+
+    return {
+      portal: mockPortal,
+      source: "fallback",
+      generationStatus: generatedRecord?.status ?? "not_generated",
+      message: generatedRecord?.errorMessage
+    };
+  },
+
   clearSessionSelectedFiles(sessionId: string) {
     clearSessionSelectedFiles(sessionId);
     clearSessionExtractions(sessionId);
+    clearSessionPortalGeneration(sessionId);
   },
 
   getMaterialsForAssignment(assignmentId: string, sessionId?: string) {
@@ -243,18 +309,6 @@ export const studyRepository = {
   },
 
   getStudyPortalForAssignment(assignmentId: string, sessionId?: string) {
-    const mockPortal = studyPortals.find((portal) => portal.assignmentId === assignmentId);
-
-    if (mockPortal) {
-      return mockPortal;
-    }
-
-    const assignment = this.getAssignmentById(assignmentId, sessionId);
-
-    if (!assignment) {
-      return null;
-    }
-
-    return createGeneratedPortal(assignment);
+    return this.getPortalViewForAssignment(assignmentId, sessionId)?.portal ?? null;
   }
 };
