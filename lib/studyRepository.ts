@@ -8,7 +8,13 @@ import {
   saveSelectedFiles
 } from "@/lib/services/selectedFilesStore";
 import { fetchClassroomCourses, fetchCourseAssignments } from "@/lib/services/googleClassroomService";
-import { Assignment, Course, StudyMaterial, StudyPortal } from "@/types/study";
+import {
+  clearSessionExtractions,
+  listExtractions,
+  removeExtraction,
+  upsertExtraction
+} from "@/lib/services/fileExtractionStore";
+import { Assignment, Course, ExtractedFileContent, StudyMaterial, StudyPortal } from "@/types/study";
 
 type CoursesWithAssignments = Course & { assignments: Assignment[] };
 
@@ -184,11 +190,34 @@ export const studyRepository = {
     }
 
     removeSelectedFile(sessionId, assignmentId, fileId);
+    removeExtraction(sessionId, assignmentId, fileId);
     return getSelectedFiles(sessionId, assignmentId);
   },
 
+
+
+  getExtractionsForAssignment(assignmentId: string, sessionId?: string) {
+    if (!sessionId) {
+      return [];
+    }
+
+    return listExtractions(sessionId, assignmentId);
+  },
+
+  upsertExtractionsForAssignment(assignmentId: string, extractions: ExtractedFileContent[], sessionId?: string) {
+    if (!sessionId) {
+      return [];
+    }
+
+    extractions.forEach((extraction) => {
+      upsertExtraction(sessionId, assignmentId, extraction);
+    });
+
+    return listExtractions(sessionId, assignmentId);
+  },
   clearSessionSelectedFiles(sessionId: string) {
     clearSessionSelectedFiles(sessionId);
+    clearSessionExtractions(sessionId);
   },
 
   getMaterialsForAssignment(assignmentId: string, sessionId?: string) {

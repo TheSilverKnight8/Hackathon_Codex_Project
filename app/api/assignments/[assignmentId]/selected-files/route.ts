@@ -1,11 +1,13 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getSession } from "@/lib/auth/session";
+import { saveDriveAccessToken } from "@/lib/auth/tokenStore";
 import { getSelectedDriveFilesMetadata } from "@/lib/services/googleDriveService";
 import { studyRepository } from "@/lib/studyRepository";
 
 type SaveSelectedFilesRequest = {
   fileIds?: string[];
   accessToken?: string;
+  expiresInSeconds?: number;
 };
 
 type RemoveSelectedFileRequest = {
@@ -39,6 +41,8 @@ export async function POST(request: NextRequest, { params }: RouteProps) {
   if (!body.accessToken || !body.fileIds || body.fileIds.length === 0) {
     return NextResponse.json({ error: "Missing access token or selected files." }, { status: 400 });
   }
+
+  saveDriveAccessToken(session.sessionId, body.accessToken, body.expiresInSeconds ?? 3600);
 
   const files = await getSelectedDriveFilesMetadata({
     accessToken: body.accessToken,

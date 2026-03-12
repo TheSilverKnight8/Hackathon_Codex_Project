@@ -2,7 +2,7 @@
 
 AI Study Portal is a Next.js + TypeScript web app that helps students move from one assignment to a focused study workspace.
 
-Current milestone: **Phase 4 complete — Google sign-in + Classroom read + Google Picker file metadata selection**.
+Current milestone: **Phase 5 complete — Google sign-in + Classroom read + Drive Picker selection + server-side raw text extraction preview**.
 
 ## What is included
 
@@ -10,6 +10,7 @@ Current milestone: **Phase 4 complete — Google sign-in + Classroom read + Goog
 - Auth-guarded dashboard with Classroom/mock course data
 - Assignment detail page with Google Picker integration
 - Selected Drive file metadata persisted per session and assignment
+- Server-side text extraction and raw preview for selected files
 - Study portal page (still mock/generated content)
 
 ## Tech stack
@@ -59,7 +60,7 @@ npm run dev
 ### Required now
 
 - `GOOGLE_CLIENT_ID` - verified server-side against ID token audience
-- `NEXT_PUBLIC_GOOGLE_CLIENT_ID` - Google Identity Services client side init
+- `NEXT_PUBLIC_GOOGLE_CLIENT_ID` - Google Identity Services client-side init
 - `NEXT_PUBLIC_GOOGLE_API_KEY` - required by Google Picker builder
 - `NEXT_PUBLIC_GOOGLE_APP_ID` - Google Cloud project number used by Picker
 - `AUTH_SESSION_SECRET` - signs HTTP-only session cookie
@@ -80,14 +81,14 @@ npm run dev
 - Classroom:
   - `https://www.googleapis.com/auth/classroom.courses.readonly`
   - `https://www.googleapis.com/auth/classroom.coursework.me.readonly`
-- Drive Picker selection:
+- Drive Picker selection and file read for chosen files:
   - `https://www.googleapis.com/auth/drive.file`
 
 Why `drive.file`:
 - It is the narrowest practical Drive scope for user-selected files.
 - It avoids broad full-drive access.
 
-## Google Cloud Console setup (Phase 4)
+## Google Cloud Console setup (Phase 5)
 
 1. Create or select a Google Cloud project.
 2. Configure OAuth consent screen.
@@ -105,13 +106,18 @@ Why `drive.file`:
 8. Use your Google Cloud project number as `NEXT_PUBLIC_GOOGLE_APP_ID`.
 9. If app is in testing mode, add test users.
 
-## Picker behavior and limitations
+## File extraction support and limitations
 
-- On assignment detail, users can pick Drive files and the app stores selected metadata only.
-- Stored metadata includes: id, name, mimeType, webViewLink, icon/thumbnail links, source type, date selected, and assignment id.
-- Users can remove selected files from the assignment.
-- If no real files are selected, mock/generated materials remain visible as fallback.
-- File content extraction/parsing is not implemented yet.
+Supported extraction types:
+- Google Docs (`application/vnd.google-apps.document`) via Drive export to plain text
+- Plain text-like files (`text/*`, `application/json`) via Drive media download
+
+Current behavior:
+- Extraction runs server-side and stores assignment-linked extraction records in lightweight in-memory storage.
+- Each selected file has extraction status: `not_extracted`, `extracting`, `extracted`, or `failed`.
+- Unsupported file types are marked `failed` with a clear error message.
+- Raw extracted text is previewed on the assignment detail page.
+- Extracted text is **not yet** used to generate the final study portal.
 
 ## Development commands
 

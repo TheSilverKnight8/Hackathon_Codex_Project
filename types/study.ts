@@ -30,6 +30,18 @@ export type StudyMaterial = {
   kind?: "doc" | "slides" | "pdf" | "sheet";
 };
 
+export type ExtractionStatus = "not_extracted" | "extracting" | "extracted" | "failed";
+
+export type ExtractedFileContent = {
+  assignmentId: string;
+  fileId: string;
+  fileName: string;
+  extractionStatus: ExtractionStatus;
+  extractedText: string;
+  extractedAt?: string;
+  errorMessage?: string;
+};
+
 export type StudyPortal = {
   id: string;
   assignmentId: string;

@@ -130,3 +130,23 @@ body {
   padding: 6px 10px;
   cursor: pointer;
 }
+
+
+.extraction-preview {
+  margin-top: 16px;
+}
+
+.extraction-item {
+  border-top: 1px solid #e5e7eb;
+  padding: 12px 0;
+}
+
+.extraction-item pre {
+  background: #111827;
+  color: #f9fafb;
+  border-radius: 6px;
+  padding: 10px;
+  white-space: pre-wrap;
+  overflow: auto;
+  max-height: 220px;
+}
