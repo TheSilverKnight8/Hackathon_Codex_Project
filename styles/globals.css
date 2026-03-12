@@ -150,3 +150,35 @@ body {
   overflow: auto;
   max-height: 220px;
 }
+
+
+.portal-item {
+  margin-bottom: 10px;
+}
+
+.portal-item > p {
+  margin: 0 0 8px;
+}
+
+.citation-list {
+  list-style: none;
+  padding: 8px;
+  margin: 0;
+  border: 1px solid #e5e7eb;
+  border-radius: 6px;
+  background: #f9fafb;
+}
+
+.citation-list li {
+  border-top: 1px solid #e5e7eb;
+  padding: 8px 0;
+}
+
+.citation-list li:first-child {
+  border-top: 0;
+}
+
+.citation-empty {
+  font-size: 0.85rem;
+  color: #6b7280;
+}

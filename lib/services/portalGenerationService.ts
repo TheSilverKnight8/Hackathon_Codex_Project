@@ -1,5 +1,6 @@
 import { Assignment, Course, ExtractedFileContent, PortalSourceUsed, StudyPortal } from "@/types/study";
 import { generatePortalWithOpenAi } from "@/lib/services/openAiPortalProvider";
+import { mapPortalCitations } from "@/lib/services/citationMappingService";
 
 type NormalizedSource = {
   fileId: string;
@@ -54,6 +55,23 @@ function buildDeterministicFallbackPortal(params: {
   const keyConcepts = buildFallbackKeyConcepts(params.assignment, params.normalizedSources);
   const dueDateText = params.assignment.dueDate || "No due date set";
 
+  const actionPlan = [
+    "Review extracted notes and highlight the core requirements.",
+    "Map each requirement to evidence from selected files.",
+    "Draft a response outline and check alignment with instructions."
+  ];
+
+  const studyChecklist = [
+    "I can explain the assignment goal in one sentence.",
+    "I identified at least three supporting points from the extracted files.",
+    "I prepared a final review pass before submitting."
+  ];
+
+  const researchTopics = [
+    `${params.assignment.title} background context`,
+    `${params.course?.title ?? "Course topic"} example analyses`
+  ];
+
   return {
     id: `generated_${params.assignment.id}`,
     assignmentId: params.assignment.id,
@@ -62,21 +80,17 @@ function buildDeterministicFallbackPortal(params: {
       `Course: ${params.course?.title ?? "Unknown course"}. Due: ${dueDateText}. ` +
       combinedExcerpt.slice(0, 320),
     keyConcepts: keyConcepts.length > 0 ? keyConcepts : ["Main objective", "Supporting evidence", "Final deliverable"],
-    actionPlan: [
-      "Review extracted notes and highlight the core requirements.",
-      "Map each requirement to evidence from selected files.",
-      "Draft a response outline and check alignment with instructions."
-    ],
-    studyChecklist: [
-      "I can explain the assignment goal in one sentence.",
-      "I identified at least three supporting points from the extracted files.",
-      "I prepared a final review pass before submitting."
-    ],
-    researchTopics: [
-      `${params.assignment.title} background context`,
-      `${params.course?.title ?? "Course topic"} example analyses`
-    ],
+    actionPlan,
+    studyChecklist,
+    researchTopics,
     sourcesUsed: params.sourcesUsed,
+    citations: mapPortalCitations({
+      keyConcepts: keyConcepts.length > 0 ? keyConcepts : ["Main objective", "Supporting evidence", "Final deliverable"],
+      actionPlan,
+      studyChecklist,
+      researchTopics,
+      sources: params.normalizedSources
+    }),
     generatedAt: new Date().toISOString(),
     usedFallback: true
   } satisfies StudyPortal;
@@ -118,6 +132,13 @@ export async function generateStudyPortal(params: {
         studyChecklist: aiDraft.studyChecklist,
         researchTopics: aiDraft.researchTopics,
         sourcesUsed,
+        citations: mapPortalCitations({
+          keyConcepts: aiDraft.keyConcepts,
+          actionPlan: aiDraft.actionPlan,
+          studyChecklist: aiDraft.studyChecklist,
+          researchTopics: aiDraft.researchTopics,
+          sources: normalizedSources
+        }),
         generatedAt: new Date().toISOString(),
         usedFallback: false
       },

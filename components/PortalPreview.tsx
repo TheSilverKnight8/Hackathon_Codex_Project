@@ -1,8 +1,35 @@
-import { StudyPortal } from "@/types/study";
+import { PortalItemCitation, StudyPortal } from "@/types/study";
 
 type PortalPreviewProps = {
   portal: StudyPortal;
 };
+
+function renderItemWithCitations(item: string, itemCitation?: PortalItemCitation) {
+  const citations = itemCitation?.citations ?? [];
+
+  return (
+    <li key={item} className="portal-item">
+      <p>{item}</p>
+      {citations.length === 0 ? (
+        <p className="citation-empty">No supporting citation found.</p>
+      ) : (
+        <ul className="citation-list">
+          {citations.map((citation) => (
+            <li key={`${citation.fileId}-${citation.startOffset ?? 0}-${citation.endOffset ?? 0}`}>
+              <strong>{citation.fileName}</strong>
+              <p>{citation.supportingSnippet}</p>
+              {citation.startOffset !== undefined && citation.endOffset !== undefined ? (
+                <p>
+                  offsets: {citation.startOffset}-{citation.endOffset}
+                </p>
+              ) : null}
+            </li>
+          ))}
+        </ul>
+      )}
+    </li>
+  );
+}
 
 export function PortalPreview({ portal }: PortalPreviewProps) {
   return (
@@ -13,19 +40,21 @@ export function PortalPreview({ portal }: PortalPreviewProps) {
       </section>
       <section className="card">
         <h3>Key Concepts</h3>
-        <ul>{portal.keyConcepts.map((item) => <li key={item}>{item}</li>)}</ul>
+        <ul>{portal.keyConcepts.map((item, index) => renderItemWithCitations(item, portal.citations?.keyConcepts[index]))}</ul>
       </section>
       <section className="card">
         <h3>Action Plan</h3>
-        <ol>{portal.actionPlan.map((item) => <li key={item}>{item}</li>)}</ol>
+        <ul>{portal.actionPlan.map((item, index) => renderItemWithCitations(item, portal.citations?.actionPlan[index]))}</ul>
       </section>
       <section className="card">
         <h3>Study Checklist</h3>
-        <ul>{portal.studyChecklist.map((item) => <li key={item}>{item}</li>)}</ul>
+        <ul>
+          {portal.studyChecklist.map((item, index) => renderItemWithCitations(item, portal.citations?.studyChecklist[index]))}
+        </ul>
       </section>
       <section className="card">
         <h3>Research Topics</h3>
-        <ul>{portal.researchTopics.map((item) => <li key={item}>{item}</li>)}</ul>
+        <ul>{portal.researchTopics.map((item, index) => renderItemWithCitations(item, portal.citations?.researchTopics[index]))}</ul>
       </section>
       <section className="card">
         <h3>Sources Used</h3>

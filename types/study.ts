@@ -48,6 +48,26 @@ export type PortalSourceUsed = {
   charsUsed: number;
 };
 
+export type PortalCitation = {
+  fileId: string;
+  fileName: string;
+  supportingSnippet: string;
+  startOffset?: number;
+  endOffset?: number;
+};
+
+export type PortalItemCitation = {
+  item: string;
+  citations: PortalCitation[];
+};
+
+export type StudyPortalCitations = {
+  keyConcepts: PortalItemCitation[];
+  actionPlan: PortalItemCitation[];
+  studyChecklist: PortalItemCitation[];
+  researchTopics: PortalItemCitation[];
+};
+
 export type StudyPortal = {
   id: string;
   assignmentId: string;
@@ -57,6 +77,7 @@ export type StudyPortal = {
   studyChecklist: string[];
   researchTopics: string[];
   sourcesUsed: PortalSourceUsed[];
+  citations?: StudyPortalCitations;
   generatedAt: string;
   usedFallback: boolean;
 };
