@@ -1,0 +1,184 @@
+:root {
+  font-family: Arial, Helvetica, sans-serif;
+  color: #1f2937;
+  background: #f3f4f6;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+}
+
+.container {
+  max-width: 900px;
+  margin: 0 auto;
+  padding: 24px;
+}
+
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 16px;
+  margin-bottom: 20px;
+}
+
+.header nav {
+  display: flex;
+  gap: 12px;
+}
+
+.card {
+  background: white;
+  border-radius: 8px;
+  padding: 16px;
+  margin-bottom: 16px;
+  border: 1px solid #e5e7eb;
+}
+
+.list,
+.checklist {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.list li {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-top: 1px solid #e5e7eb;
+  padding: 10px 0;
+}
+
+.button {
+  display: inline-block;
+  background: #2563eb;
+  color: white;
+  text-decoration: none;
+  border-radius: 6px;
+  padding: 10px 14px;
+}
+
+.inline-actions {
+  margin-top: 16px;
+}
+
+.portal-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 12px;
+}
+
+
+.notice {
+  background: #fef3c7;
+  color: #92400e;
+  padding: 10px;
+  border-radius: 6px;
+}
+
+.user-menu {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-left: auto;
+}
+
+.user-menu p {
+  margin: 0;
+  font-size: 0.85rem;
+}
+
+.user-menu button {
+  border: 1px solid #d1d5db;
+  background: white;
+  border-radius: 6px;
+  padding: 6px 10px;
+  cursor: pointer;
+}
+
+.avatar {
+  width: 32px;
+  height: 32px;
+  border-radius: 999px;
+}
+
+
+.file-list {
+  list-style: none;
+  padding: 0;
+  margin-top: 12px;
+}
+
+.file-list li {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 12px;
+  border-top: 1px solid #e5e7eb;
+  padding: 10px 0;
+}
+
+.file-list button {
+  border: 1px solid #d1d5db;
+  background: white;
+  border-radius: 6px;
+  padding: 6px 10px;
+  cursor: pointer;
+}
+
+
+.extraction-preview {
+  margin-top: 16px;
+}
+
+.extraction-item {
+  border-top: 1px solid #e5e7eb;
+  padding: 12px 0;
+}
+
+.extraction-item pre {
+  background: #111827;
+  color: #f9fafb;
+  border-radius: 6px;
+  padding: 10px;
+  white-space: pre-wrap;
+  overflow: auto;
+  max-height: 220px;
+}
+
+
+.portal-item {
+  margin-bottom: 10px;
+}
+
+.portal-item > p {
+  margin: 0 0 8px;
+}
+
+.citation-list {
+  list-style: none;
+  padding: 8px;
+  margin: 0;
+  border: 1px solid #e5e7eb;
+  border-radius: 6px;
+  background: #f9fafb;
+}
+
+.citation-list li {
+  border-top: 1px solid #e5e7eb;
+  padding: 8px 0;
+}
+
+.citation-list li:first-child {
+  border-top: 0;
+}
+
+.citation-empty {
+  font-size: 0.85rem;
+  color: #6b7280;
+}
